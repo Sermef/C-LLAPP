@@ -1,21 +1,13 @@
 // script.js
 
-// --- INIZIO CODICE PER GESTIONE UTENTE ---
-
-// Funzione per visualizzare le informazioni dell'utente
-// Questa funzione ora dipende da getSimulatedUser() fornito da userSimulator.js
+// --- CODICE PER GESTIONE UTENTE (pre-esistente, non toccato) ---
 function displayUserInfo() {
-    // Recupera i dati dell'utente dal modulo di simulazione
-    // Assicurati che userSimulator.js sia caricato prima di questo script
-    const user = getSimulatedUser(); // Chiamata alla funzione definita in userSimulator.js
-
-    // Seleziona gli elementi HTML dove verranno mostrate le informazioni
+    const user = getSimulatedUser();
     const nicknameElement = document.getElementById('user-nickname');
     const levelElement = document.getElementById('user-level');
     const xpElement = document.getElementById('user-xp');
     const sessionCodeElement = document.getElementById('session-code');
 
-    // Aggiorna il contenuto testuale degli elementi con i dati dell'utente simulato
     if (nicknameElement) {
         nicknameElement.textContent = user.nickname;
     }
@@ -29,29 +21,72 @@ function displayUserInfo() {
         sessionCodeElement.textContent = user.sessionCode;
     }
 }
-
 // --- FINE CODICE PER GESTIONE UTENTE ---
 
 
 // Creazione dell'elemento audio dalla cartella media_scene
 let audio = new Audio("media_scene/audio_1_1.mp3");
 let startTime = 0; // Tempo in ms in cui parte l'audio
-let canSelect = false; // Diventa true dopo 14 secondi
+let canSelect = false; // Diventa true dopo il tempo di clickabilità
+
+// --- NUOVA VARIABILE PER IL TEMPO DI CLICKABILITÀ ---
+let clickDelaySeconds = 0; // Verrà caricato dal CSV
+
+// --- NUOVO: Gestione del timer per la clickabilità ---
+let clickabilityTimeoutId; // Per poter cancellare il timeout se l'audio viene resettato
 
 // Inizializza i controlli audio
 document.getElementById("play-btn").addEventListener("click", function () {
-  audio.play();
-  startTime = new Date().getTime();
-  // Dopo 14 secondi, abilito le selezioni corrette
-  setTimeout(() => {
-    canSelect = true;
-    console.log("Ora puoi selezionare le risposte corrette.");
-  }, 14000);
+    // Se l'audio è già in riproduzione o in pausa, resettiamolo prima di riprodurre
+    if (!audio.paused || audio.currentTime > 0) {
+        resetAudio(); // Resetta l'audio prima di riprodurre di nuovo
+    }
+
+    audio.play();
+    startTime = new Date().getTime();
+    canSelect = false; // Resetta lo stato di clickabilità all'inizio di ogni riproduzione
+
+    // Cancella qualsiasi timeout precedente per sicurezza
+    if (clickabilityTimeoutId) {
+        clearTimeout(clickabilityTimeoutId);
+    }
+
+    // Abilita le selezioni corrette dopo il tempo specificato dal CSV
+    clickabilityTimeoutId = setTimeout(() => {
+        canSelect = true;
+        console.log(`Ora puoi selezionare le risposte corrette (dopo ${clickDelaySeconds} secondi).`);
+    }, clickDelaySeconds * 1000); // Converte secondi in millisecondi
 });
 
 document.getElementById("pause-btn").addEventListener("click", function () {
-  audio.pause();
+    audio.pause();
+    // Non azzeriamo canSelect qui, l'utente potrebbe voler riprendere dopo la pausa
 });
+
+// --- NUOVA FUNZIONE: Reset Audio ---
+document.getElementById("reset-audio-btn").addEventListener("click", function() {
+    resetAudio();
+});
+
+function resetAudio() {
+    audio.pause();
+    audio.currentTime = 0; // Riporta l'audio all'inizio
+    canSelect = false; // Disabilita la clickabilità
+    if (clickabilityTimeoutId) {
+        clearTimeout(clickabilityTimeoutId); // Cancella il timeout di clickabilità
+    }
+    console.log("Audio resettato. Clickabilità disabilitata.");
+
+    // Riabilita tutti i bottoni delle opzioni e resetta il colore
+    let optionButtons = document.querySelectorAll("#options-container .option");
+    optionButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.style.backgroundColor = ""; // Rimuovi il colore di sfondo impostato
+        btn.classList.remove("correct"); // Rimuovi la classe 'correct'
+    });
+}
+// --- FINE NUOVE FUNZIONI AUDIO ---
+
 
 // Alla fine dell'audio, controllo se tutte le opzioni sono corrette (colorate di verde)
 audio.onended = function () {
@@ -100,25 +135,41 @@ function loadCSV() {
 
 // Processa il CSV: separa le parole "ok" e "ko"
 function processCSV(data) {
-  // Utilizza entrambi i tipi di newline, compatibile con Windows e Unix
   let lines = data.trim().split(/\r?\n/);
   console.log("CSV lines:", lines);
   let okWords = [];
   let koWords = [];
   
   lines.forEach((line) => {
-    // Ignora righe vuote
     if (!line.trim()) return;
-    
+
     let parts = line.split(";");
     if (parts.length >= 2) {
-      let word = parts[0].trim();
-      let result = parts[1].trim().toLowerCase(); // "ok" o "ko"
-      if (result === "ok") {
-        okWords.push({ word, result });
-      } else if (result === "ko") {
-        koWords.push({ word, result });
-      }
+        let key = parts[0].trim().toUpperCase(); // Leggiamo la chiave
+        let value = parts[1].trim();
+
+        // --- NUOVO: Leggi il tempo di clickabilità dal CSV ---
+        if (key === "CLICK_DELAY_SECONDS") {
+            const parsedDelay = parseInt(value, 10);
+            if (!isNaN(parsedDelay) && parsedDelay >= 0) {
+                clickDelaySeconds = parsedDelay;
+                console.log(`Tempo di clickabilità impostato a ${clickDelaySeconds} secondi dal CSV.`);
+            } else {
+                console.warn(`Valore CLICK_DELAY_SECONDS non valido nel CSV: ${value}. Usando il default 0.`);
+                clickDelaySeconds = 0; // Default o un valore predefinito
+            }
+            return; // Salta il resto del processing per questa riga di configurazione
+        }
+        // --- FINE NUOVO: Leggi il tempo di clickabilità ---
+
+        // Logica esistente per parole ok/ko
+        let word = parts[0].trim();
+        let result = parts[1].trim().toLowerCase();
+        if (result === "ok") {
+            okWords.push({ word, result });
+        } else if (result === "ko") {
+            koWords.push({ word, result });
+        }
     }
   });
   
@@ -130,16 +181,12 @@ function processCSV(data) {
     return;
   }
   
-  // Seleziona casualmente 2 parole per ciascuna categoria
   let selectedOk = getRandomElements(okWords, 2);
   let selectedKo = getRandomElements(koWords, 2);
   let selected = [...selectedOk, ...selectedKo];
-  // Mischia l'array per un ordine casuale
   shuffleArray(selected);
   
-  // Popola le opzioni nella pagina
   let optionsContainer = document.getElementById("options-container");
-  // Pulisce il container se necessario
   optionsContainer.innerHTML = "";
   selected.forEach((item) => {
     let btn = document.createElement("button");
@@ -155,7 +202,6 @@ function processCSV(data) {
 
 // Gestione del click sui bottoni opzione
 function handleOptionClick(btn) {
-  // Se il bottone è già stato cliccato, esce
   if (btn.disabled) return;
   
   let clickTime = new Date().getTime();
@@ -164,15 +210,37 @@ function handleOptionClick(btn) {
   
   console.log(`Bottone "${btn.textContent}" cliccato a ${elapsed}ms - risultato previsto: ${result}`);
   
-  // Se l'utente clicca dopo 14 secondi e il risultato è "ok": colore verde, altrimenti rosso
-  if (elapsed >= 14000 && result === "ok") {
+  // --- NUOVO: Logica per i Punti XP e check con clickDelaySeconds ---
+  let isCorrect = (elapsed >= (clickDelaySeconds * 1000) && result === "ok"); // Controlla anche il tempo
+  
+  if (isCorrect) {
     btn.style.backgroundColor = "green";
     btn.classList.add("correct");
+    // Aggiungi punti XP all'utente simulato
+    updateUserExperience(100); // Esempio: aggiungi 100 XP per ogni risposta corretta
   } else {
     btn.style.backgroundColor = "red";
+    // Penalità o nessun XP per risposte sbagliate o anticipate
+    // updateUserExperience(-50); // Esempio: togli 50 XP per risposte sbagliate
   }
-  btn.disabled = true; // disabilita il bottone dopo il click
+  // --- FINE NUOVO ---
+
+  btn.disabled = true;
 }
+
+// --- NUOVA FUNZIONE: Aggiornamento dei punti XP dell'utente ---
+function updateUserExperience(points) {
+    if (window.currentUser) { // Controlla che l'oggetto utente simulato esista
+        window.currentUser.experiencePoints += points;
+        // Aggiorna la visualizzazione sulla pagina
+        displayUserInfo();
+        console.log(`Punti XP utente aggiornati: ${window.currentUser.experiencePoints}`);
+    } else {
+        console.warn("Oggetto utente simulato non trovato. Impossibile aggiornare XP.");
+    }
+}
+// --- FINE NUOVA FUNZIONE ---
+
 
 // Funzione di utilità per selezionare casualmente n elementi da un array
 function getRandomElements(array, n) {
@@ -195,8 +263,7 @@ function shuffleArray(array) {
 }
 
 // Avvio: carica il CSV quando la pagina è pronta
-// Ora chiamiamo anche displayUserInfo() qui.
 window.onload = function () {
-  displayUserInfo(); // Carica le info utente prima di tutto il resto
+  displayUserInfo();
   loadCSV();
 };
