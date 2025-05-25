@@ -1,3 +1,38 @@
+// script.js
+
+// --- INIZIO CODICE PER GESTIONE UTENTE ---
+
+// Funzione per visualizzare le informazioni dell'utente
+// Questa funzione ora dipende da getSimulatedUser() fornito da userSimulator.js
+function displayUserInfo() {
+    // Recupera i dati dell'utente dal modulo di simulazione
+    // Assicurati che userSimulator.js sia caricato prima di questo script
+    const user = getSimulatedUser(); // Chiamata alla funzione definita in userSimulator.js
+
+    // Seleziona gli elementi HTML dove verranno mostrate le informazioni
+    const nicknameElement = document.getElementById('user-nickname');
+    const levelElement = document.getElementById('user-level');
+    const xpElement = document.getElementById('user-xp');
+    const sessionCodeElement = document.getElementById('session-code');
+
+    // Aggiorna il contenuto testuale degli elementi con i dati dell'utente simulato
+    if (nicknameElement) {
+        nicknameElement.textContent = user.nickname;
+    }
+    if (levelElement) {
+        levelElement.textContent = user.level;
+    }
+    if (xpElement) {
+        xpElement.textContent = user.experiencePoints;
+    }
+    if (sessionCodeElement) {
+        sessionCodeElement.textContent = user.sessionCode;
+    }
+}
+
+// --- FINE CODICE PER GESTIONE UTENTE ---
+
+
 // Creazione dell'elemento audio dalla cartella media_scene
 let audio = new Audio("media_scene/audio_1_1.mp3");
 let startTime = 0; // Tempo in ms in cui parte l'audio
@@ -160,6 +195,8 @@ function shuffleArray(array) {
 }
 
 // Avvio: carica il CSV quando la pagina è pronta
+// Ora chiamiamo anche displayUserInfo() qui.
 window.onload = function () {
+  displayUserInfo(); // Carica le info utente prima di tutto il resto
   loadCSV();
 };
