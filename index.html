@@ -7,46 +7,40 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- Header -->
   <header>
     <div class="user-info">
       <img src="media/Avatar_1.jpg" alt="Avatar" class="avatar" />
       <div>
-        <p class="nickname">Angelo</p>
-        <p class="codes">Codice: #12345 | Sessione: #9876</p>
+        <p class="nickname">Ciao, <strong id="user-nickname">Ospite</strong>!</p>
+        <p class="codes">Livello: <span id="user-level">0</span> | Punti XP: <span id="user-xp">0</span></p>
+        <p class="codes">Codice Sessione: <span id="session-code">N/A</span></p>
       </div>
     </div>
   </header>
 
-  <!-- Titolo Campagna & Scena -->
   <div class="title-section">
     <h1>Una giornata dai nonni</h1>
     <h2>Scena: Compere per la gita</h2>
   </div>
 
-  <!-- Zona Interattiva -->
   <div class="game-area">
     <p>Ascolta l'audio e seleziona l'immagine o la parola corretta!</p>
     <div class="options" id="options-container">
-      <!-- I bottoni verranno creati dinamicamente -->
-    </div>
+      </div>
   </div>
 
-  <!-- Controlli Audio -->
   <div class="audio-controls">
-    <button id="play-btn">▶️ Play</button>
-    <button id="pause-btn">⏸️ Pausa</button>
-  </div>
-
-  <!-- Popup Modal -->
-  <div id="modal" class="modal">
+    <button id="play-btn">Play Audio</button>
+    <button id="pause-btn">Pause Audio</button>
+    <button id="reset-audio-btn">Reset Audio</button>
+  </div> <div id="modal" class="modal">
     <div class="modal-content">
       <span id="close-modal" class="close">&times;</span>
       <p id="modal-message"></p>
     </div>
   </div>
-   <!-- provvisorio -->
-  <script src="scripts/userSimulator.js"></script> 
+
+  <script src="scripts/userSimulator.js"></script>
   <script src="scripts/script.js"></script>
 </body>
 </html>
