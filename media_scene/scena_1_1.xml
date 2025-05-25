@@ -1,0 +1,41 @@
+<Campagna> 
+	<idCampagna>1</idCampagna>
+	<Titolo>Una Giornata dai nonni</Titolo>
+	<scena>
+	<idScena>1</idScena>
+		<TitoloScena>Preparativi per la gita</TitoloScena>
+		<Intro>Oggi sono andato dai nonni e andremo in gita nel bosco. E' il momento dei preparativi. Ascolto il nonno e clicco sulle cose da prendere</Intro>
+		<Soluzione></Soluzione>
+		<Oggetto>
+			<idOggetto>1</idOggetto>
+			<chk>ok</chk>
+			<time>5</time>
+			<name>Zaino</name>
+		</Oggetto>
+			<idOggetto>2</idOggetto>
+			<chk>ok</chk>
+			<time>7</time>
+			<name>Mappa</name>
+		</Oggetto>
+            <idOggetto>3</idOggetto>
+			<chk>ko</chk>
+			<time>0</time>
+			<name>Bottiglia</name>
+		</Oggetto>
+            <idOggetto>4</idOggetto>
+			<chk>ko</chk>
+			<time>0</time>
+			<name>Cappello</name>
+		</Oggetto>
+            <idOggetto>5</idOggetto>
+			<chk>ko</chk>
+			<time>0</time>
+			<name>Bussola</name>
+		</Oggetto>
+            <idOggetto>6</idOggetto>
+			<chk>ko</chk>
+			<time>0</time>
+			<name>Quaderno</name>
+		</Oggetto>
+	</scena>
+</Campagna>	

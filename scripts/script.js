@@ -30,13 +30,17 @@ let startTime = 0; // Tempo in ms in cui parte l'audio
 let canSelect = false; // Diventa true dopo il tempo di clickabilità
 
 // Variabile per il tempo di clickabilità
-let clickDelaySeconds = 0; // Verrà caricato dal CSV
+let clickDelaySeconds = 0; // Verrà caricato dal XML per ogni oggetto
 
 // Variabile per poter cancellare il timeout della clickabilità
 let clickabilityTimeoutId;
 
+// Elementi per i titoli della scena e della campagna
+let campaignTitleElement;
+let sceneTitleElement;
+let sceneIntroTextElement;
+
 // --- NUOVA LOGICA: Funzione di Reset Audio Centralizzata ---
-// Questa funzione ora si assicura di fermare tutto e ripristinare lo stato iniziale
 function resetAudioAndGame() {
     audio.pause();
     audio.currentTime = 0; // Riporta l'audio all'inizio
@@ -58,8 +62,9 @@ function resetAudioAndGame() {
         btn.classList.remove("correct"); // Rimuovi la classe 'correct'
     });
 
-    // Ricarica le opzioni dal CSV per resettare il gioco in caso di riproduzione
-    loadCSV();
+    // Ricarica le opzioni dal XML per resettare il gioco in caso di riproduzione
+    // Questo genererà nuove parole e ripristinerà l'intro
+    loadXMLScene();
 }
 // --- FINE NUOVA LOGICA DI RESET ---
 
@@ -73,16 +78,17 @@ document.getElementById("play-btn").addEventListener("click", function () {
     audio.play();
     startTime = new Date().getTime(); // Registra il nuovo tempo di inizio
 
-    // Imposta il timeout per abilitare la clickabilità
-    clickabilityTimeoutId = setTimeout(() => {
-        canSelect = true;
-        console.log(`Ora puoi selezionare le risposte corrette (dopo ${clickDelaySeconds} secondi).`);
-    }, clickDelaySeconds * 1000); // Converte secondi in millisecondi
+    // Imposta il timeout per abilitare la clickabilità (usa il valore dell'oggetto cliccato)
+    // Non possiamo impostare un timeout globale qui perché il tempo è per oggetto.
+    // La logica di canSelect verrà gestita dentro handleOptionClick() ora.
+    // Rimuoviamo il setTimeout globale qui.
+    // canSelect viene gestita solo dal click dell'utente ora, non da un timer generale.
+    // L'unica condizione sarà elapsed >= clickDelaySeconds * 1000 E result === "ok".
 });
+
 
 document.getElementById("pause-btn").addEventListener("click", function () {
     audio.pause();
-    // Non azzeriamo canSelect qui, l'utente potrebbe voler riprendere dopo la pausa
 });
 
 // Listener per il nuovo pulsante di reset
@@ -103,11 +109,6 @@ audio.onended = function () {
     if (allGreen) {
         showModal("Prova superata!");
     }
-    // Dopo che l'audio finisce, forse vogliamo disabilitare i bottoni
-    // o invitare a un nuovo gioco/reset. Per ora, i bottoni rimangono disabilitati
-    // se già cliccati, ma quelli non cliccati no. Potrebbe essere un'idea
-    // chiamare resetAudioAndGame() qui per ripartire da zero se vuoi.
-    // Oppure lasciare che l'utente clicchi il pulsante di reset.
 };
 
 // Funzione per mostrare il popup modal
@@ -123,71 +124,80 @@ document.getElementById("close-modal").addEventListener("click", function () {
     document.getElementById("modal").style.display = "none";
 });
 
-// Funzione per caricare il file CSV
-function loadCSV() {
-    fetch("media_scene/scena_1_1.csv")
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return response.text();
-        })
-        .then((data) => {
-            console.log("CSV data loaded:", data);
-            processCSV(data);
-        })
-        .catch((error) => {
-            console.error("Error loading CSV:", error);
-            // Potresti voler mostrare un messaggio all'utente qui
-        });
-}
+// --- NUOVA FUNZIONE: Processa il XML ---
+function processXML(xmlString) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
-// Processa il CSV: separa le parole "ok" e "ko"
-function processCSV(data) {
-    let lines = data.trim().split(/\r?\n/);
-    console.log("CSV lines:", lines);
-    let okWords = [];
-    let koWords = [];
+    // Controlla errori di parsing XML
+    const errorNode = xmlDoc.querySelector('parsererror');
+    if (errorNode) {
+        console.error('Errore nel parsing XML:', errorNode.textContent);
+        if(sceneIntroTextElement) {
+            sceneIntroTextElement.textContent = "Errore nella lettura dei dati della scena. Formato XML non valido.";
+        }
+        return;
+    }
 
-    // Resetting clickDelaySeconds in case CSV is reloaded
-    clickDelaySeconds = 0;
+    // Estrai i dati dalla Campagna
+    const campagnaElement = xmlDoc.querySelector('Campagna');
+    if (!campagnaElement) {
+        console.error("Elemento <Campagna> non trovato nel XML.");
+        return;
+    }
 
-    lines.forEach((line) => {
-        if (!line.trim()) return;
+    // Estrai il Titolo della Campagna e aggiorna l'HTML
+    const campaignTitle = campagnaElement.querySelector('Titolo')?.textContent || 'Campagna senza titolo';
+    if(campaignTitleElement) {
+        campaignTitleElement.textContent = campaignTitle;
+    }
 
-        let parts = line.split(";");
-        if (parts.length >= 2) {
-            let key = parts[0].trim().toUpperCase();
-            let value = parts[1].trim();
 
-            if (key === "CLICK_DELAY_SECONDS") {
-                const parsedDelay = parseInt(value, 10);
-                if (!isNaN(parsedDelay) && parsedDelay >= 0) {
-                    clickDelaySeconds = parsedDelay;
-                    console.log(`Tempo di clickabilità impostato a ${clickDelaySeconds} secondi dal CSV.`);
-                } else {
-                    console.warn(`Valore CLICK_DELAY_SECONDS non valido nel CSV: ${value}. Usando il default 0.`);
-                    clickDelaySeconds = 0;
-                }
-                return;
-            }
+    // Estrai i dati dalla scena
+    const scenaElement = campagnaElement.querySelector('scena'); // CERCA SCENA DENTRO CAMPAGNA
+    if (!scenaElement) {
+        console.error("Elemento <scena> non trovato nel XML (o non dentro <Campagna>).");
+        return;
+    }
 
-            let word = parts[0].trim();
-            let result = parts[1].trim().toLowerCase();
-            if (result === "ok") {
-                okWords.push({ word, result });
-            } else if (result === "ko") {
-                koWords.push({ word, result });
-            }
+    const titoloScena = scenaElement.querySelector('TitoloScena')?.textContent || 'Scena senza titolo';
+    const introText = scenaElement.querySelector('Intro')?.textContent || 'Nessuna introduzione.';
+
+    // Aggiorna il titolo della scena nell'HTML
+    if(sceneTitleElement) {
+        sceneTitleElement.textContent = titoloScena;
+    }
+    // Aggiorna il testo di introduzione della scena nell'HTML
+    if(sceneIntroTextElement) {
+        sceneIntroTextElement.textContent = introText;
+    }
+
+    const oggetti = [];
+    scenaElement.querySelectorAll('Oggetto').forEach(objElement => {
+        const idOggetto = objElement.querySelector('idOggetto')?.textContent;
+        const chk = objElement.querySelector('chk')?.textContent;
+        const time = objElement.querySelector('time')?.textContent;
+        const name = objElement.querySelector('name')?.textContent;
+
+        if (idOggetto && chk && time && name) {
+            oggetti.push({
+                id: parseInt(idOggetto, 10),
+                chk: chk.toLowerCase(),
+                time: parseInt(time, 10),
+                name: name
+            });
         }
     });
 
-    console.log("Parole ok:", okWords);
-    console.log("Parole ko:", koWords);
+    console.log("Oggetti estratti dall'XML:", oggetti);
+
+    // Seleziona casualmente 2 parole "ok" e 2 "ko" come prima
+    let okWords = oggetti.filter(obj => obj.chk === "ok");
+    let koWords = oggetti.filter(obj => obj.chk === "ko");
 
     if (okWords.length < 2 || koWords.length < 2) {
-        console.error("Non ci sono abbastanza parole nel CSV per entrambe le categorie.");
-        // Considera di mostrare un messaggio all'utente o disabilitare il gioco qui
+        console.error("Non ci sono abbastanza oggetti 'ok' o 'ko' nel XML per selezionarne 2 per categoria.");
+        // Potresti voler mostrare un messaggio all'utente o disabilitare il gioco qui
         return;
     }
 
@@ -201,8 +211,10 @@ function processCSV(data) {
     selected.forEach((item) => {
         let btn = document.createElement("button");
         btn.className = "option";
-        btn.textContent = item.word;
-        btn.setAttribute("data-result", item.result);
+        btn.textContent = item.name;
+        btn.setAttribute("data-result", item.chk);
+        btn.setAttribute("data-delay", item.time);
+
         btn.addEventListener("click", function () {
             handleOptionClick(btn);
         });
@@ -217,10 +229,14 @@ function handleOptionClick(btn) {
     let clickTime = new Date().getTime();
     let elapsed = clickTime - startTime;
     let result = btn.getAttribute("data-result");
+    let objectDelaySeconds = parseInt(btn.getAttribute("data-delay"), 10); // Leggiamo il ritardo specifico dell'oggetto
 
-    console.log(`Bottone "${btn.textContent}" cliccato a ${elapsed}ms - risultato previsto: ${result}`);
+    console.log(`Bottone "${btn.textContent}" cliccato a ${elapsed}ms - risultato previsto: ${result}, ritardo richiesto: ${objectDelaySeconds}s`);
 
-    let isCorrect = (canSelect && result === "ok"); // Controlla anche che sia cliccabile e risultato sia "ok"
+    // La risposta è corretta se:
+    // 1. È stata cliccata dopo il 'time' specificato per quell'oggetto (in millisecondi)
+    // 2. Il suo attributo 'chk' è "ok"
+    let isCorrect = (elapsed >= (objectDelaySeconds * 1000) && result === "ok");
 
     if (isCorrect) {
         btn.style.backgroundColor = "green";
@@ -267,8 +283,13 @@ function shuffleArray(array) {
     }
 }
 
-// Avvio: carica il CSV quando la pagina è pronta
+// Avvio: carica la scena XML quando la pagina è pronta
 window.onload = function () {
     displayUserInfo();
-    loadCSV();
+    // Inizializza gli elementi HTML all'avvio
+    campaignTitleElement = document.getElementById("campaign-title");
+    sceneTitleElement = document.getElementById("scene-title");
+    sceneIntroTextElement = document.getElementById("scene-intro-text");
+
+    loadXMLScene();
 };
