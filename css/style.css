@@ -1,144 +1,84 @@
 /* Global */
 body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
+    font-family: 'Arial', sans-serif; /* Potresti usare un font più "giocoso" da Google Fonts */
+    text-align: center;
+    background-color: #e0f7fa; /* Un azzurro chiaro, più vivace */
+    margin: 0;
+    padding: 0;
+    display: flex; /* Centra il contenuto verticalmente */
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh; /* Fa in modo che il body occupi l'intera altezza della finestra */
 }
 
-/* Header */
+/* Header (per info utente) */
 header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 10px;
-  background-color: #fff;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    padding: 10px 20px;
+    background-color: #80cbc4; /* Colore più vivace */
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: flex-end; /* Sposta le info utente a destra */
+    align-items: center;
+    box-sizing: border-box; /* Include padding e border nella larghezza totale */
 }
 
 .user-info {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Spazio tra avatar e testo */
+    background-color: #c8e6c9; /* Sfondo leggero per le info utente */
+    padding: 8px 15px;
+    border-radius: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+    width: 50px; /* Aumenta la dimensione dell'avatar */
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #388e3c; /* Bordo colorato per l'avatar */
+    object-fit: cover; /* Assicura che l'immagine copra l'area senza distorsioni */
 }
 
 .nickname {
-  font-size: 18px;
-  font-weight: bold;
-  margin: 0;
+    font-size: 1.1em; /* Leggermente più grande */
+    font-weight: bold;
+    color: #2e7d32; /* Verde scuro */
+    margin: 0;
 }
 
 .codes {
-  font-size: 14px;
-  color: gray;
-  margin: 0;
+    font-size: 0.85em; /* Leggermente più piccolo */
+    color: #555;
+    margin: 0;
+}
+
+/* Contenitore principale del gioco */
+.game-container {
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 800px; /* Aumenta la larghezza massima per più spazio */
+    width: 90%; /* Responsive width */
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Spazio tra le sezioni interne */
 }
 
 /* Titolo Campagna & Scena */
 .title-section h1,
 .title-section h2 {
-  color: red;
-  margin-top: 20px;
+    color: #d32f2f; /* Un rosso più vibrante */
+    margin: 0; /* Rimuovi margini predefiniti */
+    font-weight: bold;
 }
 .title-section h1 {
-  font-size: 24px;
+    font-size: 2.2em; /* Aumenta la dimensione */
+    margin-bottom: 5px;
 }
 .title-section h2 {
-  font-size: 18px;
-}
-
-/* Game Area */
-.game-area {
-  margin: 20px auto;
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  width: 80%;
-  max-width: 600px;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.options {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.option {
-  padding: 10px;
-  font-size: 16px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.option:hover {
-  background-color: #0056b3;
-}
-
-/* Audio Controls */
-.audio-controls {
-  margin-top: 20px;
-}
-
-.audio-controls button {
-  padding: 10px;
-  font-size: 16px;
-  margin: 5px;
-  background-color: green;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.audio-controls button:hover {
-  background-color: darkgreen;
-}
-
-/* Modal Popup */
-.modal {
-  display: none; /* Nascondo di default */
-  position: fixed;
-  z-index: 100;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
-}
-
-/* Modal Content */
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  max-width: 300px;
-  border-radius: 10px;
-}
-
-/* Close Button */
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-}
+    font-size: 1.5em; /* Aumenta la dimensione */
+    color: #e5737
