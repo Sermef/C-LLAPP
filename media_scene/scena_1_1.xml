@@ -12,26 +12,31 @@
 			<time>5</time>
 			<name>Zaino</name>
 		</Oggetto>
+		<Oggetto>
 			<idOggetto>2</idOggetto>
 			<chk>ok</chk>
 			<time>7</time>
 			<name>Mappa</name>
 		</Oggetto>
+		<Oggetto>
             <idOggetto>3</idOggetto>
 			<chk>ko</chk>
 			<time>0</time>
 			<name>Bottiglia</name>
 		</Oggetto>
+		<Oggetto>
             <idOggetto>4</idOggetto>
 			<chk>ko</chk>
 			<time>0</time>
 			<name>Cappello</name>
 		</Oggetto>
+		<Oggetto>
             <idOggetto>5</idOggetto>
 			<chk>ko</chk>
 			<time>0</time>
 			<name>Bussola</name>
 		</Oggetto>
+		<Oggetto>
             <idOggetto>6</idOggetto>
 			<chk>ko</chk>
 			<time>0</time>
