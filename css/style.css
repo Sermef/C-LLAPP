@@ -82,3 +82,34 @@ header {
 .title-section h2 {
     font-size: 1.5em; /* Aumenta la dimensione */
     color: #e5737
+	
+
+.audio-controls {
+  margin-top: 20px;
+  display: flex; /* Usa flexbox per allineare bottoni e tempo */
+  justify-content: center; /* Centra gli elementi */
+  align-items: center; /* Allinea verticalmente */
+  gap: 10px; /* Spazio tra gli elementi */
+}
+
+.audio-button { /* Stile generale per i bottoni audio */
+  padding: 5px; /* Riduci il padding per le immagini */
+  background-color: transparent; /* Rendi lo sfondo trasparente */
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  display: flex; /* Per centrare l'immagine all'interno del bottone */
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s; /* Effetto hover */
+}
+
+.audio-button:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Leggero sfondo al passaggio del mouse */
+}
+
+.audio-button img {
+  width: 40px;  /* Dimensione desiderata per le icone (adatta se necessario) */
+  height: 40px; /* Rendi le icone quadrate */
+  display: block; /* Rimuovi lo spazio extra sotto l'immagine */
+}

@@ -32,15 +32,18 @@
       </div>
   
   <div class="audio-controls">
-    <button id="play-btn">Play Audio</button>
-    <button id="pause-btn">Pause Audio</button>
-    <button id="reset-audio-btn">Reset Audio</button>
-  </div> <div id="modal" class="modal">
-    <div class="modal-content">
+    <button id="play-btn" class="audio-button"><img src="media/play.gif" alt="Play"></button>
+    <button id="pause-btn" class="audio-button"><img src="media/pause.gif" alt="Pause"></button>
+    <button id="reset-audio-btn" class="audio-button"><img src="media/reset.gif" alt="Reset"></button>
+    <span id="audio-time">00:00 / 00:00</span> 
+  </div>
+  
+  
+  <div class="modal-content">
       <span id="close-modal" class="close">&times;</span>
       <p id="modal-message"></p>
     </div>
-  </div>
+</div>
 
   <script src="scripts/userSimulator.js"></script>
   <script src="scripts/script.js"></script>
