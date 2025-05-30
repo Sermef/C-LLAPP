@@ -87,8 +87,9 @@ function resetAudioAndGame() {
     let optionButtons = document.querySelectorAll("#options-container .option");
     optionButtons.forEach(btn => {
         btn.disabled = false;
-        btn.style.backgroundColor = ""; // Rimuove il colore di sfondo impostato da precedenti click
         btn.classList.remove("correct"); // Rimuove la classe 'correct'
+        btn.classList.remove("red-background"); // Rimuove la classe 'red-background'
+        btn.style.backgroundColor = ""; // Rimuove il colore di sfondo impostato da precedenti click (se non si usa la classe)
     });
 
     // Aggiorna il display del tempo dell'audio a 00:00 (e durata se già disponibile)
@@ -138,7 +139,7 @@ function showModal(message) {
     let modal = document.getElementById("modal");
     let modalMessage = document.getElementById("modal-message");
     modalMessage.textContent = message;
-    modal.style.display = "block";
+    modal.style.display = "flex"; // Usa flex per centrare il contenuto
 }
 
 // Gestore per la chiusura della modal
@@ -293,13 +294,13 @@ function handleOptionClick(btn) {
     let isCorrect = (elapsed >= (objectDelaySeconds * 1000) && result === "ok");
 
     if (isCorrect) {
-        btn.style.backgroundColor = "green";
-        btn.classList.add("correct");
+        btn.classList.add("correct"); // Applica la classe per le risposte corrette
         updateUserExperience(100); // Aggiunge XP per risposte corrette
+        showModal("Corretto! Hai guadagnato 100 XP."); // Mostra un messaggio di successo
     } else {
-        btn.style.backgroundColor = "red";
-        // Potresti aggiungere una penalità di XP qui, o un messaggio di feedback
-        // updateUserExperience(-50);
+        btn.classList.add("red-background"); // Applica la classe per le risposte sbagliate
+        updateUserExperience(-50); // Penalità di XP per risposte sbagliate
+        showModal("Sbagliato! Hai perso 50 XP."); // Mostra un messaggio di errore
     }
 
     btn.disabled = true; // Disabilita il bottone dopo il click

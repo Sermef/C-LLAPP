@@ -1,115 +1,282 @@
 /* Global */
 body {
-    font-family: 'Arial', sans-serif; /* Potresti usare un font più "giocoso" da Google Fonts */
+    font-family: 'Arial', sans-serif;
     text-align: center;
-    background-color: #e0f7fa; /* Un azzurro chiaro, più vivace */
+    background-color: #e0f7fa;
     margin: 0;
     padding: 0;
-    display: flex; /* Centra il contenuto verticalmente */
+    display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh; /* Fa in modo che il body occupi l'intera altezza della finestra */
+    min-height: 100vh;
 }
 
 /* Header (per info utente) */
 header {
     width: 100%;
     padding: 10px 20px;
-    background-color: #80cbc4; /* Colore più vivace */
+    background-color: #80cbc4;
     box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
     display: flex;
-    justify-content: flex-end; /* Sposta le info utente a destra */
+    justify-content: flex-end;
     align-items: center;
-    box-sizing: border-box; /* Include padding e border nella larghezza totale */
+    box-sizing: border-box;
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 10px; /* Spazio tra avatar e testo */
-    background-color: #c8e6c9; /* Sfondo leggero per le info utente */
+    gap: 10px;
+    background-color: #c8e6c9;
     padding: 8px 15px;
     border-radius: 20px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .avatar {
-    width: 50px; /* Aumenta la dimensione dell'avatar */
+    width: 50px;
     height: 50px;
     border-radius: 50%;
-    border: 2px solid #388e3c; /* Bordo colorato per l'avatar */
-    object-fit: cover; /* Assicura che l'immagine copra l'area senza distorsioni */
+    border: 2px solid #388e3c;
+    object-fit: cover;
 }
 
 .nickname {
-    font-size: 1.1em; /* Leggermente più grande */
+    font-size: 1.1em;
     font-weight: bold;
-    color: #2e7d32; /* Verde scuro */
+    color: #2e7d32;
     margin: 0;
 }
 
 .codes {
-    font-size: 0.85em; /* Leggermente più piccolo */
+    font-size: 0.85em;
     color: #555;
     margin: 0;
 }
 
-/* Contenitore principale del gioco */
-.game-container {
+/* Titolo Campagna & Scena */
+.title-section {
+    margin-top: 20px; /* Aggiunto margine per distanziare dall'header */
+    margin-bottom: 20px; /* Margine inferiore */
+}
+
+.title-section h1 {
+    color: #d32f2f;
+    margin: 0;
+    font-weight: bold;
+    font-size: 2.2em;
+    margin-bottom: 5px;
+}
+
+.title-section h2 {
+    font-size: 1.5em;
+    color: #e57373; /* Colore più chiaro per il sottotitolo */
+}
+
+/* Contenitore principale del gioco - game-area */
+.game-area {
     background-color: #ffffff;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     padding: 30px;
     margin: 20px auto;
-    max-width: 800px; /* Aumenta la larghezza massima per più spazio */
-    width: 90%; /* Responsive width */
-    display: flex;
-    flex-direction: column;
-    gap: 25px; /* Spazio tra le sezioni interne */
+    max-width: 800px;
+    width: 90%;
+    display: flex; /* Usa flexbox */
+    flex-direction: column; /* Impila gli elementi verticalmente */
+    align-items: center; /* Centra orizzontalmente gli elementi figli */
+    justify-content: center; /* Centra verticalmente gli elementi figli */
+    gap: 25px;
 }
 
-/* Titolo Campagna & Scena */
-.title-section h1,
-.title-section h2 {
-    color: #d32f2f; /* Un rosso più vibrante */
-    margin: 0; /* Rimuovi margini predefiniti */
+/* Stili per il testo di introduzione */
+#scene-intro-text {
+    font-size: 1.1em;
+    color: #333;
+    background-color: #f9f9f9; /* Sfondo leggero */
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    line-height: 1.5;
+    margin-bottom: 20px; /* Spazio sotto il testo intro */
+}
+
+/* Contenitore delle opzioni (bottoni) */
+.options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Bottoni più grandi e adattivi */
+    gap: 20px; /* Aumenta lo spazio tra i bottoni */
+    width: 100%; /* Occupa tutta la larghezza disponibile nel game-area */
+    max-width: 600px; /* Limita la larghezza massima per mantenere una buona leggibilità */
+    justify-content: center; /* Centra la griglia se non riempie tutta la larghezza */
+    align-items: center; /* Allinea verticalmente gli elementi della griglia */
+    margin: 0 auto; /* Centra il contenitore stesso */
+}
+
+/* Stile dei bottoni delle opzioni */
+.option {
+    background-color: #64b5f6; /* Un blu più vivace */
+    color: white;
+    padding: 18px 25px; /* Padding più generoso */
+    border: none;
+    border-radius: 12px; /* Bordi più arrotondati */
+    font-size: 1.3em; /* Font più grande */
     font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 6px #42a5f5; /* Ombra per effetto 3D */
+    position: relative; /* Per l'effetto click */
+    letter-spacing: 0.5px; /* Leggera spaziatura tra le lettere */
 }
-.title-section h1 {
-    font-size: 2.2em; /* Aumenta la dimensione */
-    margin-bottom: 5px;
-}
-.title-section h2 {
-    font-size: 1.5em; /* Aumenta la dimensione */
-    color: #e5737
-	
 
+.option:hover:not(:disabled) {
+    background-color: #42a5f5; /* Blu più scuro al hover */
+    transform: translateY(-4px); /* Leggero sollevamento */
+    box-shadow: 0 10px #2196f3; /* Ombra più pronunciata al hover */
+}
+
+.option:active:not(:disabled) {
+    transform: translateY(2px); /* Abbassamento per simulare il click */
+    box-shadow: 0 2px #2196f3; /* Ombra ridotta al click */
+}
+
+.option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #90caf9; /* Colore più chiaro quando disabilitato */
+    box-shadow: 0 3px #64b5f6; /* Ombra leggera quando disabilitato */
+}
+
+.option.correct {
+    background-color: #66bb6a; /* Verde per corretto */
+    box-shadow: 0 6px #43a047; /* Ombra verde */
+}
+
+.option.correct:hover:not(:disabled) {
+    background-color: #43a047;
+    box-shadow: 0 10px #2e7d32;
+}
+
+.option.correct:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 2px #2e7d32;
+}
+
+.option.red-background { /* Nuova classe per indicare una selezione sbagliata */
+    background-color: #ef5350; /* Rosso per sbagliato */
+    box-shadow: 0 6px #e53935; /* Ombra rossa */
+}
+
+.option.red-background:hover:not(:disabled) {
+    background-color: #e53935;
+    box-shadow: 0 10px #c62828;
+}
+
+.option.red-background:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 2px #c62828;
+}
+
+
+/* Controlli audio */
 .audio-controls {
-  margin-top: 20px;
-  display: flex; /* Usa flexbox per allineare bottoni e tempo */
-  justify-content: center; /* Centra gli elementi */
-  align-items: center; /* Allinea verticalmente */
-  gap: 10px; /* Spazio tra gli elementi */
+  margin-top: 30px; /* Aumentato il margine superiore */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px; /* Aumentato lo spazio tra gli elementi */
 }
 
-.audio-button { /* Stile generale per i bottoni audio */
-  padding: 5px; /* Riduci il padding per le immagini */
-  background-color: transparent; /* Rendi lo sfondo trasparente */
+.audio-button {
+  padding: 8px; /* Aumentato il padding per un'area cliccabile maggiore */
+  background-color: #ffe082; /* Giallo chiaro */
   border: none;
   cursor: pointer;
-  border-radius: 5px;
-  display: flex; /* Per centrare l'immagine all'interno del bottone */
+  border-radius: 50%; /* Bottoni rotondi */
+  display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s; /* Effetto hover */
+  transition: background-color 0.2s, transform 0.2s;
+  box-shadow: 0 3px #ffc107; /* Ombra per effetto 3D */
 }
 
 .audio-button:hover {
-  background-color: rgba(0, 0, 0, 0.1); /* Leggero sfondo al passaggio del mouse */
+  background-color: #ffc107; /* Giallo più scuro al hover */
+  transform: translateY(-2px); /* Leggero sollevamento */
+  box-shadow: 0 5px #ffa000;
+}
+
+.audio-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px #ffa000;
 }
 
 .audio-button img {
-  width: 40px;  /* Dimensione desiderata per le icone (adatta se necessario) */
-  height: 40px; /* Rendi le icone quadrate */
-  display: block; /* Rimuovi lo spazio extra sotto l'immagine */
+  width: 35px; /* Dimensione leggermente ridotta delle icone */
+  height: 35px;
+  display: block;
+}
+
+/* Stili per il display del tempo audio */
+#audio-time {
+    font-size: 1.2em; /* Font più grande */
+    font-weight: bold;
+    color: #333;
+    background-color: #f0f0f0;
+    padding: 8px 15px; /* Padding aumentato */
+    border-radius: 8px; /* Bordi più arrotondati */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Ombra interna */
+}
+
+/* Stili per il Modal (Popup) */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  position: relative;
+  animation-name: animatemodal;
+  animation-duration: 0.4s;
+}
+
+@keyframes animatemodal {
+  from {opacity: 0; transform: translateY(-50px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
 }
