@@ -6,7 +6,7 @@
 		<TitoloScena>Preparativi per la gita</TitoloScena>
 		<Intro>Oggi sono andato dai nonni e andremo in gita nel bosco. E' il momento dei preparativi. Ascolto il nonno e clicco sulle cose da prendere</Intro>
 		<Soluzione></Soluzione>
-        <MinScore>150</MinScore> <Oggetto>
+        <MinScore>75</MinScore> <Oggetto>
 			<idOggetto>1</idOggetto>
 			<chk>ok</chk>
 			<time>5</time>
