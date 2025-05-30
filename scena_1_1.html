@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compere per la gita</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="user-info">
+      <img src="media/Avatar_1.jpg" alt="Avatar" class="avatar" />
+      <div>
+        <p class="nickname">Ciao, <strong id="user-nickname">Ospite</strong>!</p>
+        <p class="codes">Livello: <span id="user-level">0</span> | Punti XP: <span id="user-xp">0</span></p>
+        <p class="codes">Codice Sessione: <span id="session-code">N/A</span></p>
+      </div>
+    </div>
+  </header>
+
+<div class="title-section">
+  <h1 id="campaign-title">Una giornata dai nonni</h1> 
+  <h2 id="scene-title">Scena: Compere per la gita</h2>   
+</div>
+
+ <div class="game-area">
+    <p>Ascolta l'audio e seleziona l'immagine o la parola corretta!</p>
+    <p id="scene-intro-text"></p> 
+    <div class="options" id="options-container">
+    </div>
+  </div>
+  
+  <div class="audio-controls">
+    <button id="play-btn" class="audio-button"><img src="media/play.gif" alt="Play"></button>
+    <button id="pause-btn" class="audio-button"><img src="media/pause.gif" alt="Pause"></button>
+    <button id="reset-audio-btn" class="audio-button"><img src="media/reset.gif" alt="Reset"></button>
+    <span id="audio-time">00:00 / 00:00</span> 
+  </div>
+  
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span id="close-modal" class="close">&times;</span>
+      <p id="modal-message"></p>
+    </div>
+  </div>
+
+  <script src="scripts/userSimulator.js"></script>
+  <script src="scripts/script.js"></script>
+</body>
+</html>
