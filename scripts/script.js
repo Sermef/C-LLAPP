@@ -38,6 +38,10 @@ let sceneTitleElement;
 let sceneIntroTextElement;
 let audioTimeDisplayElement; // Elemento per la visualizzazione del tempo dell'audio
 
+let minScoreToPass = 0; // Variabile per memorizzare il punteggio minimo dalla XML
+let correctlyClickedOkItems = 0; // Contatore per gli oggetti "ok" cliccati correttamente
+let totalOkItems = 0; // Numero totale di oggetti "ok" nella scena
+
 
 // --- FUNZIONI DI UTILITÀ PER IL TEMPO ---
 // Formatta i secondi in formato MM:SS
@@ -75,6 +79,8 @@ function resetAudioAndGame() {
     audio.currentTime = 0; // Riporta l'audio all'inizio
     startTime = 0; // Resetta il tempo di inizio per una nuova sessione di gioco
     canSelect = false; // Disabilita la clickabilità
+    correctlyClickedOkItems = 0; // Resetta il contatore degli oggetti "ok" cliccati
+    totalOkItems = 0; // Resetta il totale degli oggetti "ok"
 
     // Cancella qualsiasi timeout pendente (utile se reintroduciamo un timer globale)
     if (clickabilityTimeoutId) {
@@ -91,6 +97,12 @@ function resetAudioAndGame() {
         btn.classList.remove("red-background"); // Rimuove la classe 'red-background'
         btn.style.backgroundColor = ""; // Rimuove il colore di sfondo impostato da precedenti click (se non si usa la classe)
     });
+
+    // Nasconde il bottone "Passa alla Scena Successiva"
+    const nextSceneBtn = document.getElementById('next-scene-btn');
+    if (nextSceneBtn) {
+        nextSceneBtn.remove(); // Rimuove il bottone dal DOM
+    }
 
     // Aggiorna il display del tempo dell'audio a 00:00 (e durata se già disponibile)
     if (audioTimeDisplayElement) {
@@ -200,7 +212,7 @@ function processXML(xmlString) {
 
 
     // Estrai i dati dalla Scena (all'interno di Campagna)
-    const scenaElement = campagnaElement.querySelector('scena'); // CERCA SCENA DENTRO CAMPAGNA
+    const scenaElement = campagnaElement.querySelector('scena');
     if (!scenaElement) {
         console.error("Elemento <scena> non trovato nel XML (o non è un figlio diretto di <Campagna>).");
         return;
@@ -208,6 +220,16 @@ function processXML(xmlString) {
 
     const titoloScena = scenaElement.querySelector('TitoloScena')?.textContent || 'Scena senza titolo';
     const introText = scenaElement.querySelector('Intro')?.textContent || 'Nessuna introduzione.';
+    
+    // Estrai il punteggio minimo per passare alla scena successiva
+    const minScoreElement = scenaElement.querySelector('MinScore');
+    if (minScoreElement) {
+        minScoreToPass = parseInt(minScoreElement.textContent, 10);
+        console.log("Punteggio minimo per passare alla scena successiva:", minScoreToPass);
+    } else {
+        console.warn("Elemento <MinScore> non trovato nel XML. Impostato a 0.");
+        minScoreToPass = 0;
+    }
 
     // Aggiorna gli elementi HTML con i dati estratti
     if(sceneTitleElement) {
@@ -244,10 +266,12 @@ function processXML(xmlString) {
     let okWords = oggetti.filter(obj => obj.chk === "ok");
     let koWords = oggetti.filter(obj => obj.chk === "ko");
 
+    // Imposta il numero totale di oggetti "ok" per la scena
+    totalOkItems = okWords.length;
+
     // Gestione di casi insufficienti (per evitare errori se ci sono meno di 2 "ok" o "ko")
     if (okWords.length < 2 || koWords.length < 2) {
         console.error("Non ci sono abbastanza oggetti 'ok' o 'ko' nel XML per selezionarne 2 per categoria.");
-        // Potresti voler mostrare un messaggio di errore visibile all'utente o disabilitare il gioco
         document.getElementById("options-container").innerHTML = "<p>Errore: non abbastanza parole per avviare il gioco.</p>";
         return;
     }
@@ -297,6 +321,7 @@ function handleOptionClick(btn) {
         btn.classList.add("correct"); // Applica la classe per le risposte corrette
         updateUserExperience(100); // Aggiunge XP per risposte corrette
         showModal("Corretto! Hai guadagnato 100 XP."); // Mostra un messaggio di successo
+        correctlyClickedOkItems++; // Incrementa il contatore degli oggetti "ok" cliccati correttamente
     } else {
         btn.classList.add("red-background"); // Applica la classe per le risposte sbagliate
         updateUserExperience(-50); // Penalità di XP per risposte sbagliate
@@ -304,8 +329,45 @@ function handleOptionClick(btn) {
     }
 
     btn.disabled = true; // Disabilita il bottone dopo il click
+
+    // Controlla se tutti gli oggetti "ok" sono stati cliccati correttamente
+    if (correctlyClickedOkItems === totalOkItems) {
+        console.log("Tutti gli oggetti 'ok' sono stati cliccati correttamente.");
+        checkAndDisplayNextSceneButton();
+    }
 }
 // --- FINE LOGICA DI GIOCO ---
+
+// --- LOGICA DI PROGRESSIONE SCENA ---
+function checkAndDisplayNextSceneButton() {
+    const user = getSimulatedUser(); // Ottieni i dati utente aggiornati
+    if (user.experiencePoints >= minScoreToPass) {
+        console.log("Punteggio raggiunto! Mostro il bottone per la scena successiva.");
+        displayNextSceneButton();
+    } else {
+        showModal(`Non hai raggiunto il punteggio minimo (${minScoreToPass} XP) per passare alla prossima scena. Riprova!`);
+        // Potresti voler resettare il gioco qui o dare altre opzioni
+    }
+}
+
+function displayNextSceneButton() {
+    let gameArea = document.querySelector('.game-area');
+    let nextSceneBtn = document.getElementById('next-scene-btn');
+
+    // Se il bottone esiste già, non fare nulla
+    if (nextSceneBtn) {
+        return;
+    }
+
+    nextSceneBtn = document.createElement('a');
+    nextSceneBtn.id = 'next-scene-btn';
+    nextSceneBtn.href = 'scena_1_2.html'; // Link alla prossima scena
+    nextSceneBtn.textContent = 'Passa alla Scena Successiva';
+    
+    // Aggiungi il bottone alla fine dell'area di gioco
+    gameArea.appendChild(nextSceneBtn);
+}
+// --- FINE LOGICA DI PROGRESSIONE SCENA ---
 
 
 // --- GESTIONE PUNTI ESPERIENZA (XP) ---

@@ -56,8 +56,8 @@ header {
 
 /* Titolo Campagna & Scena */
 .title-section {
-    margin-top: 20px; /* Aggiunto margine per distanziare dall'header */
-    margin-bottom: 20px; /* Margine inferiore */
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .title-section h1 {
@@ -70,7 +70,7 @@ header {
 
 .title-section h2 {
     font-size: 1.5em;
-    color: #e57373; /* Colore più chiaro per il sottotitolo */
+    color: #e57373;
 }
 
 /* Contenitore principale del gioco - game-area */
@@ -82,10 +82,10 @@ header {
     margin: 20px auto;
     max-width: 800px;
     width: 90%;
-    display: flex; /* Usa flexbox */
-    flex-direction: column; /* Impila gli elementi verticalmente */
-    align-items: center; /* Centra orizzontalmente gli elementi figli */
-    justify-content: center; /* Centra verticalmente gli elementi figli */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 25px;
 }
 
@@ -93,63 +93,64 @@ header {
 #scene-intro-text {
     font-size: 1.1em;
     color: #333;
-    background-color: #f9f9f9; /* Sfondo leggero */
+    background-color: #f9f9f9;
     padding: 15px 20px;
     border-radius: 8px;
     border: 1px solid #eee;
     line-height: 1.5;
-    margin-bottom: 20px; /* Spazio sotto il testo intro */
+    margin-bottom: 20px;
 }
 
 /* Contenitore delle opzioni (bottoni) */
 .options {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Bottoni più grandi e adattivi */
-    gap: 20px; /* Aumenta lo spazio tra i bottoni */
-    width: 100%; /* Occupa tutta la larghezza disponibile nel game-area */
-    max-width: 600px; /* Limita la larghezza massima per mantenere una buona leggibilità */
-    justify-content: center; /* Centra la griglia se non riempie tutta la larghezza */
-    align-items: center; /* Allinea verticalmente gli elementi della griglia */
-    margin: 0 auto; /* Centra il contenitore stesso */
+    /* Forza 2 colonne di uguale larghezza */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 20px;
+    width: 100%;
+    max-width: 600px; /* Mantiene una larghezza massima per la griglia */
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
 }
 
 /* Stile dei bottoni delle opzioni */
 .option {
-    background-color: #64b5f6; /* Un blu più vivace */
+    background-color: #64b5f6;
     color: white;
-    padding: 18px 25px; /* Padding più generoso */
+    padding: 18px 25px;
     border: none;
-    border-radius: 12px; /* Bordi più arrotondati */
-    font-size: 1.3em; /* Font più grande */
+    border-radius: 12px;
+    font-size: 1.3em;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    box-shadow: 0 6px #42a5f5; /* Ombra per effetto 3D */
-    position: relative; /* Per l'effetto click */
-    letter-spacing: 0.5px; /* Leggera spaziatura tra le lettere */
+    box-shadow: 0 6px #42a5f5;
+    position: relative;
+    letter-spacing: 0.5px;
 }
 
 .option:hover:not(:disabled) {
-    background-color: #42a5f5; /* Blu più scuro al hover */
-    transform: translateY(-4px); /* Leggero sollevamento */
-    box-shadow: 0 10px #2196f3; /* Ombra più pronunciata al hover */
+    background-color: #42a5f5;
+    transform: translateY(-4px);
+    box-shadow: 0 10px #2196f3;
 }
 
 .option:active:not(:disabled) {
-    transform: translateY(2px); /* Abbassamento per simulare il click */
-    box-shadow: 0 2px #2196f3; /* Ombra ridotta al click */
+    transform: translateY(2px);
+    box-shadow: 0 2px #2196f3;
 }
 
 .option:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background-color: #90caf9; /* Colore più chiaro quando disabilitato */
-    box-shadow: 0 3px #64b5f6; /* Ombra leggera quando disabilitato */
+    background-color: #90caf9;
+    box-shadow: 0 3px #64b5f6;
 }
 
 .option.correct {
-    background-color: #66bb6a; /* Verde per corretto */
-    box-shadow: 0 6px #43a047; /* Ombra verde */
+    background-color: #66bb6a;
+    box-shadow: 0 6px #43a047;
 }
 
 .option.correct:hover:not(:disabled) {
@@ -162,9 +163,9 @@ header {
     box-shadow: 0 2px #2e7d32;
 }
 
-.option.red-background { /* Nuova classe per indicare una selezione sbagliata */
-    background-color: #ef5350; /* Rosso per sbagliato */
-    box-shadow: 0 6px #e53935; /* Ombra rossa */
+.option.red-background {
+    background-color: #ef5350;
+    box-shadow: 0 6px #e53935;
 }
 
 .option.red-background:hover:not(:disabled) {
@@ -177,32 +178,31 @@ header {
     box-shadow: 0 2px #c62828;
 }
 
-
 /* Controlli audio */
 .audio-controls {
-  margin-top: 30px; /* Aumentato il margine superiore */
+  margin-top: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px; /* Aumentato lo spazio tra gli elementi */
+  gap: 15px;
 }
 
 .audio-button {
-  padding: 8px; /* Aumentato il padding per un'area cliccabile maggiore */
-  background-color: #ffe082; /* Giallo chiaro */
+  padding: 8px;
+  background-color: #ffe082;
   border: none;
   cursor: pointer;
-  border-radius: 50%; /* Bottoni rotondi */
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s, transform 0.2s;
-  box-shadow: 0 3px #ffc107; /* Ombra per effetto 3D */
+  box-shadow: 0 3px #ffc107;
 }
 
 .audio-button:hover {
-  background-color: #ffc107; /* Giallo più scuro al hover */
-  transform: translateY(-2px); /* Leggero sollevamento */
+  background-color: #ffc107;
+  transform: translateY(-2px);
   box-shadow: 0 5px #ffa000;
 }
 
@@ -212,25 +212,25 @@ header {
 }
 
 .audio-button img {
-  width: 35px; /* Dimensione leggermente ridotta delle icone */
+  width: 35px;
   height: 35px;
   display: block;
 }
 
 /* Stili per il display del tempo audio */
 #audio-time {
-    font-size: 1.2em; /* Font più grande */
+    font-size: 1.2em;
     font-weight: bold;
     color: #333;
     background-color: #f0f0f0;
-    padding: 8px 15px; /* Padding aumentato */
-    border-radius: 8px; /* Bordi più arrotondati */
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Ombra interna */
+    padding: 8px 15px;
+    border-radius: 8px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* Stili per il Modal (Popup) */
 .modal {
-  /* display: none; */ /* Commentato per test, riabilitare per nascondere di default */
+  display: none;
   position: fixed;
   z-index: 1;
   left: 0;
@@ -239,7 +239,7 @@ header {
   height: 100%;
   overflow: auto;
   background-color: rgba(0,0,0,0.4);
-  display: flex; /* Usa flex per centrare il contenuto */
+  display: flex;
   justify-content: center;
   align-items: center;
 }
@@ -279,4 +279,32 @@ header {
   color: black;
   text-decoration: none;
   cursor: pointer;
+}
+
+/* Stile per il bottone "Passa alla Scena Successiva" */
+#next-scene-btn {
+    margin-top: 30px;
+    padding: 15px 30px;
+    background-color: #4CAF50; /* Verde brillante */
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px #388E3C; /* Ombra per effetto 3D */
+    text-decoration: none; /* Rimuove la sottolineatura del link */
+    display: inline-block; /* Permette di applicare padding e margin come un blocco */
+}
+
+#next-scene-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-3px);
+    box-shadow: 0 8px #2E7D32;
+}
+
+#next-scene-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px #2E7D32;
 }
