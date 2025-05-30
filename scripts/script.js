@@ -30,7 +30,7 @@ function displayUserInfo() {
 let audio = new Audio("media_scene/audio_1_1.mp3");
 let startTime = 0; // Tempo in ms in cui l'audio è partito per la scena corrente
 let canSelect = false; // Non usato per il timer globale, ma per controllo generale se necessario
-let clickabilityTimeoutId; // Per poter cancellare eventuali timeout futuri se reintrodotti
+let clickabilityTimeoutId; // Per poter cancellare eventuali timeout futuri se reintrodotto
 
 // Elementi del DOM per l'aggiornamento dinamico dei testi e del tempo
 let campaignTitleElement;
@@ -341,6 +341,7 @@ function handleOptionClick(btn) {
 // --- LOGICA DI PROGRESSIONE SCENA ---
 function checkAndDisplayNextSceneButton() {
     const user = getSimulatedUser(); // Ottieni i dati utente aggiornati
+    console.log(`Controllo progressione scena: XP Utente: ${user.experiencePoints}, Punteggio Minimo: ${minScoreToPass}`);
     if (user.experiencePoints >= minScoreToPass) {
         console.log("Punteggio raggiunto! Mostro il bottone per la scena successiva.");
         displayNextSceneButton();
@@ -366,6 +367,7 @@ function displayNextSceneButton() {
     
     // Aggiungi il bottone alla fine dell'area di gioco
     gameArea.appendChild(nextSceneBtn);
+    console.log("Bottone 'Passa alla Scena Successiva' aggiunto al DOM.");
 }
 // --- FINE LOGICA DI PROGRESSIONE SCENA ---
 
