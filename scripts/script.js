@@ -1,9 +1,16 @@
 // script.js
+// Questo file contiene le funzionalità principali dell'applicazione,
+// la gestione dell'utente, i controlli audio e la gestione del modal.
+
+// Crea un oggetto globale 'App' per esporre funzioni e variabili ad altri script,
+// come scene.js, evitando variabili globali sparse.
+window.App = window.App || {};
 
 // --- CODICE PER GESTIONE UTENTE ---
 // Questa funzione aggiorna le informazioni dell'utente simulate nel DOM.
 function displayUserInfo() {
-    const user = getSimulatedUser(); // Assumi che getSimulatedUser() sia in userSimulator.js
+    // Assumi che getSimulatedUser() sia definito in userSimulator.js e accessibile globalmente
+    const user = getSimulatedUser(); 
     const nicknameElement = document.getElementById('user-nickname');
     const levelElement = document.getElementById('user-level');
     const xpElement = document.getElementById('user-xp');
@@ -22,15 +29,31 @@ function displayUserInfo() {
         sessionCodeElement.textContent = user.sessionCode;
     }
 }
+// Espone la funzione displayUserInfo tramite l'oggetto App
+window.App.displayUserInfo = displayUserInfo;
+// Espone getSimulatedUser per essere accessibile da scene.js (se necessario)
+window.App.getSimulatedUser = typeof getSimulatedUser !== 'undefined' ? getSimulatedUser : () => ({ nickname: 'Ospite', level: 0, experiencePoints: 0, sessionCode: 'N/A' });
+
+
+// Aggiorna i punti esperienza dell'utente simulato e il display
+function updateUserExperience(points) {
+    if (window.currentUser) { // Assicurati che l'oggetto utente simulato esista
+        window.currentUser.experiencePoints += points;
+        displayUserInfo(); // Aggiorna la visualizzazione delle informazioni utente
+        console.log(`Punti XP utente aggiornati: ${window.currentUser.experiencePoints}`);
+    } else {
+        console.warn("Oggetto utente simulato (window.currentUser) non trovato. Impossibile aggiornare XP.");
+    }
+}
+// Espone la funzione updateUserExperience tramite l'oggetto App
+window.App.updateUserExperience = updateUserExperience;
 // --- FINE CODICE PER GESTIONE UTENTE ---
 
 
-// --- VARIABILI GLOBALI PER LA SCENA E L'AUDIO ---
+// --- VARIABILI GLOBALI PER L'AUDIO E RIFERIMENTI DOM ---
 // Creazione dell'elemento audio dalla cartella media_scene
 let audio = new Audio("media_scene/audio_1_1.mp3");
 let startTime = 0; // Tempo in ms in cui l'audio è partito per la scena corrente
-let canSelect = false; // Non usato per il timer globale, ma per controllo generale se necessario
-let clickabilityTimeoutId; // Per poter cancellare eventuali timeout futuri se reintrodotto
 
 // Elementi del DOM per l'aggiornamento dinamico dei testi e del tempo
 let campaignTitleElement;
@@ -38,9 +61,16 @@ let sceneTitleElement;
 let sceneIntroTextElement;
 let audioTimeDisplayElement; // Elemento per la visualizzazione del tempo dell'audio
 
-let minScoreToPass = 0; // Variabile per memorizzare il punteggio minimo dalla XML
-let correctlyClickedOkItems = 0; // Contatore per gli oggetti "ok" cliccati correttamente
-let totalOkItems = 0; // Numero totale di oggetti "ok" nella scena
+// Espone l'oggetto audio e le funzioni per accedere/modificare startTime
+window.App.audio = audio;
+window.App.getStartTime = () => startTime;
+window.App.setStartTime = (time) => { startTime = time; };
+
+// Espone i riferimenti agli elementi DOM
+window.App.getCampaignTitleElement = () => campaignTitleElement;
+window.App.getSceneTitleElement = () => sceneTitleElement;
+window.App.getSceneIntroTextElement = () => sceneIntroTextElement;
+window.App.getAudioTimeDisplayElement = () => audioTimeDisplayElement;
 
 
 // --- FUNZIONI DI UTILITÀ PER IL TEMPO ---
@@ -52,6 +82,8 @@ function formatTime(seconds) {
     const paddedSeconds = String(remainingSeconds).padStart(2, '0');
 	return `${paddedMinutes}:${paddedSeconds}`;
 }
+// Espone la funzione formatTime
+window.App.formatTime = formatTime;
 
 // Listener che aggiorna il display del tempo dell'audio mentre l'audio è in riproduzione
 audio.addEventListener('timeupdate', function() {
@@ -72,63 +104,37 @@ audio.addEventListener('loadedmetadata', function() {
 // --- FINE FUNZIONI DI UTILITÀ PER IL TEMPO ---
 
 
-// --- LOGICA DI RESET COMPLETO DELLA SCENA ---
-// Questa funzione ripristina l'intero stato della scena e dell'audio.
+// --- LOGICA DI RESET COMPLETO DELL'APPLICAZIONE ---
+// Questa funzione ripristina l'intero stato dell'audio e chiama il reset della scena.
 function resetAudioAndGame() {
     audio.pause();
     audio.currentTime = 0; // Riporta l'audio all'inizio
-    startTime = 0; // Resetta il tempo di inizio per una nuova sessione di gioco
-    canSelect = false; // Disabilita la clickabilità
-    correctlyClickedOkItems = 0; // Resetta il contatore degli oggetti "ok" cliccati
-    totalOkItems = 0; // Resetta il totale degli oggetti "ok"
+    window.App.setStartTime(0); // Resetta il tempo di inizio per una nuova sessione di gioco
 
-    // Cancella qualsiasi timeout pendente (utile se reintroduciamo un timer globale)
-    if (clickabilityTimeoutId) {
-        clearTimeout(clickabilityTimeoutId);
-        clickabilityTimeoutId = null;
-    }
-    console.log("Audio e gioco resettati. Clickabilità disabilitata.");
-
-    // Riabilita tutti i bottoni delle opzioni e resetta il loro colore
-    let optionButtons = document.querySelectorAll("#options-container .option");
-    optionButtons.forEach(btn => {
-        btn.disabled = false;
-        btn.classList.remove("correct"); // Rimuove la classe 'correct'
-        btn.classList.remove("red-background"); // Rimuove la classe 'red-background'
-        btn.style.backgroundColor = ""; // Rimuove il colore di sfondo impostato da precedenti click (se non si usa la classe)
-    });
-
-    // Nasconde il bottone "Passa alla Scena Successiva"
-    const nextSceneBtn = document.getElementById('next-scene-btn');
-    if (nextSceneBtn) {
-        nextSceneBtn.remove(); // Rimuove il bottone dal DOM
-    }
+    console.log("Audio resettato.");
 
     // Aggiorna il display del tempo dell'audio a 00:00 (e durata se già disponibile)
     if (audioTimeDisplayElement) {
         audioTimeDisplayElement.textContent = '00:00 / ' + (isNaN(audio.duration) ? '--:--' : formatTime(audio.duration));
     }
 
-    // Ricarica la scena dal XML per rigenerare le parole e l'intro
-    loadXMLScene();
+    // Chiama la funzione di reset specifica della scena, se definita
+    if (typeof window.resetSceneState === 'function') {
+        window.resetSceneState();
+    }
 }
-// --- FINE LOGICA DI RESET COMPLETO DELLA SCENA ---
+// --- FINE LOGICA DI RESET COMPLETO DELL'APPLICAZIONE ---
 
 
 // --- GESTIONE DEI CONTROLLI AUDIO (PLAY, PAUSE, RESET) ---
 // Gestore per il pulsante Play
 document.getElementById("play-btn").addEventListener("click", function () {
-    // Se l'audio è finito o è al punto iniziale (0), ripartiamo dall'inizio.
-    // Altrimenti, riprende semplicemente da dove era stato messo in pausa.
     if (audio.ended || audio.currentTime === 0) {
-        audio.currentTime = 0; // Assicurati che parta da 0 se è finito
+        audio.currentTime = 0;
     }
     audio.play();
-
-    // Registra il tempo di inizio SOLO se non è già stato registrato per la sessione corrente
-    // Questo è fondamentale per calcolare il 'elapsed' correttamente per i click sugli oggetti
-    if (startTime === 0) {
-        startTime = new Date().getTime();
+    if (window.App.getStartTime() === 0) {
+        window.App.setStartTime(new Date().getTime());
     }
     console.log("Audio riprodotto.");
 });
@@ -141,7 +147,7 @@ document.getElementById("pause-btn").addEventListener("click", function () {
 
 // Gestore per il pulsante Reset
 document.getElementById("reset-audio-btn").addEventListener("click", function() {
-    resetAudioAndGame(); // Il pulsante di reset triggera il reset completo della scena
+    resetAudioAndGame();
 });
 // --- FINE GESTIONE DEI CONTROLLI AUDIO ---
 
@@ -150,240 +156,24 @@ document.getElementById("reset-audio-btn").addEventListener("click", function() 
 function showModal(message) {
     let modal = document.getElementById("modal");
     let modalMessage = document.getElementById("modal-message");
-    modalMessage.textContent = message;
-    modal.style.display = "flex"; // Usa flex per centrare il contenuto
+    if (modal && modalMessage) { // Aggiunto controllo null
+        modalMessage.textContent = message;
+        modal.style.display = "flex"; // Usa flex per centrare il contenuto
+    } else {
+        console.error("Modal o modalMessage non trovati nel DOM.");
+    }
 }
+// Espone la funzione showModal
+window.App.showModal = showModal;
 
 // Gestore per la chiusura della modal
 document.getElementById("close-modal").addEventListener("click", function () {
-    document.getElementById("modal").style.display = "none";
+    let modal = document.getElementById("modal");
+    if (modal) { // Aggiunto controllo null
+        modal.style.display = "none";
+    }
 });
 // --- FINE GESTIONE MODAL ---
-
-
-// --- CARICAMENTO E PARSING XML DELLA SCENA ---
-// Carica il file XML che definisce la scena
-function loadXMLScene() {
-    fetch("media_scene/scena_1_1.xml") // Percorso del file XML
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok: " + response.statusText);
-            }
-            return response.text();
-        })
-        .then(xmlString => {
-            console.log("XML data loaded:", xmlString);
-            processXML(xmlString); // Processa la stringa XML
-        })
-        .catch(error => {
-            console.error("Error loading XML:", error);
-            // Mostra un messaggio di errore all'utente se il caricamento fallisce
-            if(sceneIntroTextElement) {
-                sceneIntroTextElement.textContent = "Errore nel caricamento della scena. Riprova più tardi.";
-            }
-        });
-}
-
-// Processa il contenuto XML per estrarre i dati della scena e generare i bottoni
-function processXML(xmlString) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-
-    // Controlla se ci sono stati errori nel parsing del XML
-    const errorNode = xmlDoc.querySelector('parsererror');
-    if (errorNode) {
-        console.error('Errore nel parsing XML:', errorNode.textContent);
-        if(sceneIntroTextElement) {
-            sceneIntroTextElement.textContent = "Errore nella lettura dei dati della scena. Formato XML non valido.";
-        }
-        return;
-    }
-
-    // Estrai i dati dalla Campagna (elemento radice)
-    const campagnaElement = xmlDoc.querySelector('Campagna');
-    if (!campagnaElement) {
-        console.error("Elemento <Campagna> non trovato nel XML. Assicurati che sia la radice.");
-        return;
-    }
-    const campaignTitle = campagnaElement.querySelector('Titolo')?.textContent || 'Campagna senza titolo';
-    if(campaignTitleElement) {
-        campaignTitleElement.textContent = campaignTitle;
-    }
-
-
-    // Estrai i dati dalla Scena (all'interno di Campagna)
-    const scenaElement = campagnaElement.querySelector('scena');
-    if (!scenaElement) {
-        console.error("Elemento <scena> non trovato nel XML (o non è un figlio diretto di <Campagna>).");
-        return;
-    }
-
-    const titoloScena = scenaElement.querySelector('TitoloScena')?.textContent || 'Scena senza titolo';
-    const introText = scenaElement.querySelector('Intro')?.textContent || 'Nessuna introduzione.';
-    
-    // Estrai il punteggio minimo per passare alla scena successiva
-    const minScoreElement = scenaElement.querySelector('MinScore');
-    if (minScoreElement) {
-        minScoreToPass = parseInt(minScoreElement.textContent, 10);
-        console.log("Punteggio minimo per passare alla scena successiva:", minScoreToPass);
-    } else {
-        console.warn("Elemento <MinScore> non trovato nel XML. Impostato a 0.");
-        minScoreToPass = 0;
-    }
-
-    // Aggiorna gli elementi HTML con i dati estratti
-    if(sceneTitleElement) {
-        sceneTitleElement.textContent = titoloScena;
-    }
-    if(sceneIntroTextElement) {
-        sceneIntroTextElement.textContent = introText;
-    }
-
-    // Estrai tutti gli oggetti (`<Oggetto>`) dalla scena
-    const oggetti = [];
-    scenaElement.querySelectorAll('Oggetto').forEach(objElement => {
-        const idOggetto = objElement.querySelector('idOggetto')?.textContent;
-        const chk = objElement.querySelector('chk')?.textContent;
-        const time = objElement.querySelector('time')?.textContent;
-        const name = objElement.querySelector('name')?.textContent;
-
-        // Assicurati che tutti i dati essenziali siano presenti prima di aggiungerli
-        if (idOggetto && chk && time && name) {
-            oggetti.push({
-                id: parseInt(idOggetto, 10),
-                chk: chk.toLowerCase(), // Converti in minuscolo per consistenza
-                time: parseInt(time, 10), // Converti in numero
-                name: name
-            });
-        } else {
-            console.warn("Oggetto incompleto trovato nel XML, ignorato:", objElement.textContent);
-        }
-    });
-
-    console.log("Oggetti estratti dall'XML:", oggetti);
-
-    // Filtra e seleziona casualmente 2 parole "ok" e 2 "ko"
-    let okWords = oggetti.filter(obj => obj.chk === "ok");
-    let koWords = oggetti.filter(obj => obj.chk === "ko");
-
-    // Imposta il numero totale di oggetti "ok" per la scena
-    totalOkItems = okWords.length;
-
-    // Gestione di casi insufficienti (per evitare errori se ci sono meno di 2 "ok" o "ko")
-    if (okWords.length < 2 || koWords.length < 2) {
-        console.error("Non ci sono abbastanza oggetti 'ok' o 'ko' nel XML per selezionarne 2 per categoria.");
-        document.getElementById("options-container").innerHTML = "<p>Errore: non abbastanza parole per avviare il gioco.</p>";
-        return;
-    }
-
-    let selectedOk = getRandomElements(okWords, 2);
-    let selectedKo = getRandomElements(koWords, 2);
-    let selected = [...selectedOk, ...selectedKo]; // Combina le selezioni
-    shuffleArray(selected); // Mischia l'ordine
-
-    // Genera i bottoni delle opzioni nel DOM
-    let optionsContainer = document.getElementById("options-container");
-    optionsContainer.innerHTML = ""; // Pulisce qualsiasi bottone precedente
-
-    selected.forEach((item) => {
-        let btn = document.createElement("button");
-        btn.className = "option";
-        btn.textContent = item.name; // Testo del bottone dall'attributo 'name' dell'oggetto
-        btn.setAttribute("data-result", item.chk); // "ok" o "ko"
-        btn.setAttribute("data-delay", item.time); // Tempo di clickabilità specifico per questo oggetto
-
-        btn.addEventListener("click", function () {
-            handleOptionClick(btn);
-        });
-        optionsContainer.appendChild(btn);
-    });
-}
-// --- FINE CARICAMENTO E PARSING XML ---
-
-
-// --- LOGICA DI GIOCO: GESTIONE DEL CLICK SUI BOTTONI OPZIONE ---
-function handleOptionClick(btn) {
-    if (btn.disabled) return; // Impedisce doppi click
-
-    let clickTime = new Date().getTime();
-    let elapsed = clickTime - startTime; // Tempo trascorso dall'inizio dell'audio
-    let result = btn.getAttribute("data-result"); // "ok" o "ko"
-    let objectDelaySeconds = parseInt(btn.getAttribute("data-delay"), 10); // Ritardo specifico dell'oggetto
-
-    console.log(`Bottone "${btn.textContent}" cliccato a ${elapsed}ms - risultato previsto: ${result}, ritardo richiesto: ${objectDelaySeconds}s`);
-
-    // La risposta è considerata corretta se:
-    // 1. Il click è avvenuto dopo il 'time' specificato per quell'oggetto (convertito in millisecondi)
-    // 2. L'attributo 'chk' dell'oggetto è "ok"
-    let isCorrect = (elapsed >= (objectDelaySeconds * 1000) && result === "ok");
-
-    if (isCorrect) {
-        btn.classList.add("correct"); // Applica la classe per le risposte corrette
-        updateUserExperience(100); // Aggiunge XP per risposte corrette
-        showModal("Corretto! Hai guadagnato 100 XP."); // Mostra un messaggio di successo
-        correctlyClickedOkItems++; // Incrementa il contatore degli oggetti "ok" cliccati correttamente
-    } else {
-        btn.classList.add("red-background"); // Applica la classe per le risposte sbagliate
-        updateUserExperience(-50); // Penalità di XP per risposte sbagliate
-        showModal("Sbagliato! Hai perso 50 XP."); // Mostra un messaggio di errore
-    }
-
-    btn.disabled = true; // Disabilita il bottone dopo il click
-
-    // Controlla se tutti gli oggetti "ok" sono stati cliccati correttamente
-    if (correctlyClickedOkItems === totalOkItems) {
-        console.log("Tutti gli oggetti 'ok' sono stati cliccati correttamente.");
-        checkAndDisplayNextSceneButton();
-    }
-}
-// --- FINE LOGICA DI GIOCO ---
-
-// --- LOGICA DI PROGRESSIONE SCENA ---
-function checkAndDisplayNextSceneButton() {
-    const user = getSimulatedUser(); // Ottieni i dati utente aggiornati
-    console.log(`Controllo progressione scena: XP Utente: ${user.experiencePoints}, Punteggio Minimo: ${minScoreToPass}`);
-    if (user.experiencePoints >= minScoreToPass) {
-        console.log("Punteggio raggiunto! Mostro il bottone per la scena successiva.");
-        displayNextSceneButton();
-    } else {
-        showModal(`Non hai raggiunto il punteggio minimo (${minScoreToPass} XP) per passare alla prossima scena. Riprova!`);
-        // Potresti voler resettare il gioco qui o dare altre opzioni
-    }
-}
-
-function displayNextSceneButton() {
-    let gameArea = document.querySelector('.game-area');
-    let nextSceneBtn = document.getElementById('next-scene-btn');
-
-    // Se il bottone esiste già, non fare nulla
-    if (nextSceneBtn) {
-        return;
-    }
-
-    nextSceneBtn = document.createElement('a');
-    nextSceneBtn.id = 'next-scene-btn';
-    nextSceneBtn.href = 'scena_1_2.html'; // Link alla prossima scena
-    nextSceneBtn.textContent = 'Passa alla Scena Successiva';
-    
-    // Aggiungi il bottone alla fine dell'area di gioco
-    gameArea.appendChild(nextSceneBtn);
-    console.log("Bottone 'Passa alla Scena Successiva' aggiunto al DOM.");
-}
-// --- FINE LOGICA DI PROGRESSIONE SCENA ---
-
-
-// --- GESTIONE PUNTI ESPERIENZA (XP) ---
-// Aggiorna i punti esperienza dell'utente simulato e il display
-function updateUserExperience(points) {
-    if (window.currentUser) { // Assicurati che l'oggetto utente simulato esista
-        window.currentUser.experiencePoints += points;
-        displayUserInfo(); // Aggiorna la visualizzazione delle informazioni utente
-        console.log(`Punti XP utente aggiornati: ${window.currentUser.experiencePoints}`);
-    } else {
-        console.warn("Oggetto utente simulato (window.currentUser) non trovato. Impossibile aggiornare XP.");
-    }
-}
-// --- FINE GESTIONE PUNTI ESPERIENZA (XP) ---
 
 
 // --- FUNZIONI DI UTILITÀ GENERALI ---
@@ -398,6 +188,8 @@ function getRandomElements(array, n) {
     }
     return result;
 }
+// Espone la funzione getRandomElements
+window.App.getRandomElements = getRandomElements;
 
 // Mischia un array usando l'algoritmo Fisher-Yates
 function shuffleArray(array) {
@@ -406,6 +198,8 @@ function shuffleArray(array) {
         [array[i], array[j]] = [array[j], array[i]]; // Scambia gli elementi
     }
 }
+// Espone la funzione shuffleArray
+window.App.shuffleArray = shuffleArray;
 // --- FINE FUNZIONI DI UTILITÀ GENERALI ---
 
 
@@ -425,5 +219,10 @@ window.onload = function () {
         audioTimeDisplayElement.textContent = '00:00 / --:--';
     }
 
-    loadXMLScene(); // Carica i dati della scena dal file XML
+    // Chiama la funzione di inizializzazione della scena, definita in scene.js
+    if (typeof window.initScene === 'function') {
+        window.initScene();
+    } else {
+        console.error("Errore: La funzione 'initScene' non è stata trovata. Assicurati che 'scene.js' sia caricato correttamente.");
+    }
 };
