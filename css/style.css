@@ -118,7 +118,7 @@ header {
 #live-feedback-messages p {
     margin: 5px 0;
     padding: 3px 0;
-    border-bottom: 1px dashed #bbdefb; /* Linea leggera tra i messaggi */
+    border-bottom: 1px dashed #bbdefeb; /* Linea leggera tra i messaggi */
 }
 
 #live-feedback-messages p:last-child {
@@ -150,6 +150,7 @@ header {
 
 /* Stile dei bottoni delle opzioni */
 .option {
+    display: inline-block; /* Assicurati che sia trattato come un blocco per scopi di layout */
     background-color: #64b5f6;
     color: white;
     padding: 18px 25px;
@@ -265,7 +266,7 @@ header {
 
 /* Stili per il Modal (Popup) */
 .modal {
-  display: none; /* Correzione: Nascosto di default. Sarà mostrato da JS con display:flex */
+  display: none; /* Nascosto di default. Sarà mostrato da JS con display:flex */
   position: fixed;
   z-index: 1;
   left: 0;
@@ -342,4 +343,31 @@ header {
 #next-scene-btn:active {
     transform: translateY(1px);
     box-shadow: 0 2px #2E7D32;
+}
+
+/* Stile per il bottone "Torna alla Home" */
+.home-button {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #6c757d; /* Grigio scuro */
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 3px #5a6268;
+}
+
+.home-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 5px #495057;
+}
+
+.home-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px #495057;
 }
