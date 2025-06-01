@@ -6,6 +6,9 @@
 // come scene.js, evitando variabili globali sparse.
 window.App = window.App || {};
 
+// Variabile per memorizzare la callback da eseguire alla chiusura del modal
+let modalCloseCallback = null;
+
 // --- CODICE PER GESTIONE UTENTE ---
 // Questa funzione aggiorna le informazioni dell'utente simulate nel DOM.
 function displayUserInfo() {
@@ -152,13 +155,14 @@ document.getElementById("reset-audio-btn").addEventListener("click", function() 
 // --- FINE GESTIONE DEI CONTROLLI AUDIO ---
 
 // --- GESTIONE MODAL (POPUP) ---
-// Funzione per mostrare il popup modal con un messaggio
-function showModal(message) {
+// Funzione per mostrare il popup modal con un messaggio e una callback opzionale
+function showModal(message, callback = null) {
     let modal = document.getElementById("modal");
     let modalMessage = document.getElementById("modal-message");
-    if (modal && modalMessage) { // Aggiunto controllo null
+    if (modal && modalMessage) {
         modalMessage.textContent = message;
         modal.style.display = "flex"; // Usa flex per centrare il contenuto
+        modalCloseCallback = callback; // Imposta la callback
     } else {
         console.error("Modal o modalMessage non trovati nel DOM.");
     }
@@ -169,8 +173,13 @@ window.App.showModal = showModal;
 // Gestore per la chiusura della modal
 document.getElementById("close-modal").addEventListener("click", function () {
     let modal = document.getElementById("modal");
-    if (modal) { // Aggiunto controllo null
+    if (modal) {
         modal.style.display = "none";
+        // Esegui la callback se presente
+        if (typeof modalCloseCallback === 'function') {
+            modalCloseCallback();
+            modalCloseCallback = null; // Resetta la callback dopo l'esecuzione
+        }
     }
 });
 // --- FINE GESTIONE MODAL ---

@@ -7,6 +7,7 @@ let minScoreToPass = 0;
 let correctlyClickedOkItems = 0;
 let totalOkItems = 0;
 let currentSceneId = '1_1'; // Valore di default, verrà sovrascritto dall'URL
+let liveFeedbackMessagesElement; // Riferimento al nuovo div per i messaggi di feedback
 
 // Funzione di utilità per ottenere i parametri dall'URL
 function getUrlParameter(name) {
@@ -19,6 +20,12 @@ function getUrlParameter(name) {
 // Funzione di inizializzazione della scena, chiamata da script.js
 function initScene() {
     console.log("Inizializzazione della scena...");
+    // Ottieni il reference al div per i messaggi di feedback
+    liveFeedbackMessagesElement = document.getElementById('live-feedback-messages');
+    if (!liveFeedbackMessagesElement) {
+        console.error("Elemento #live-feedback-messages non trovato nel DOM.");
+    }
+
     // Ottieni il sceneId dall'URL, se presente
     const sceneIdFromUrl = getUrlParameter('sceneId');
     if (sceneIdFromUrl) {
@@ -34,6 +41,11 @@ function initScene() {
 function resetSceneState() {
     correctlyClickedOkItems = 0; // Resetta il contatore degli oggetti "ok" cliccati
     totalOkItems = 0; // Resetta il totale degli oggetti "ok"
+
+    // Pulisce i messaggi di feedback intermedi
+    if (liveFeedbackMessagesElement) {
+        liveFeedbackMessagesElement.innerHTML = '';
+    }
 
     // Riabilita tutti i bottoni delle opzioni e resetta il loro colore
     let optionButtons = document.querySelectorAll("#options-container .option");
@@ -216,21 +228,32 @@ function handleOptionClick(btn) {
 
     console.log(`Bottone "${btn.textContent}" cliccato a ${elapsed}ms - risultato previsto: ${result}, ritardo richiesto: ${objectDelaySeconds}s`);
 
+    let feedbackMessage = "";
     // La risposta è considerata corretta se:
     // 1. Il click è avvenuto dopo il 'time' specificato per quell'oggetto (convertito in millisecondi)
     // 2. L'attributo 'chk' dell'oggetto è "ok"
     let isCorrect = (elapsed >= (objectDelaySeconds * 1000) && result === "ok");
 
-    // Usa le funzioni da window.App per aggiornare XP e mostrare il modal
+    // Usa le funzioni da window.App per aggiornare XP
     if (isCorrect) {
         btn.classList.add("correct"); // Applica la classe per le risposte corrette
         window.App.updateUserExperience(100); // Aggiunge XP per risposte corrette
-        window.App.showModal("Corretto! Hai guadagnato 100 XP."); // Mostra un messaggio di successo
+        feedbackMessage = `Corretto! Hai guadagnato 100 XP cliccando "${btn.textContent}".`;
         correctlyClickedOkItems++; // Incrementa il contatore degli oggetti "ok" cliccati correttamente
     } else {
         btn.classList.add("red-background"); // Applica la classe per le risposte sbagliate
         window.App.updateUserExperience(-50); // Penalità di XP per risposte sbagliate
-        window.App.showModal("Sbagliato! Hai perso 50 XP."); // Mostra un messaggio di errore
+        feedbackMessage = `Sbagliato! Hai perso 50 XP cliccando "${btn.textContent}".`;
+    }
+
+    // Aggiungi il messaggio di feedback al div dedicato
+    if (liveFeedbackMessagesElement) {
+        const p = document.createElement('p');
+        p.textContent = feedbackMessage;
+        p.classList.add(isCorrect ? 'feedback-correct' : 'feedback-incorrect'); // Aggiungi classi per stile
+        liveFeedbackMessagesElement.appendChild(p);
+        // Scorrimento automatico per visualizzare l'ultimo messaggio
+        liveFeedbackMessagesElement.scrollTop = liveFeedbackMessagesElement.scrollHeight;
     }
 
     btn.disabled = true; // Disabilita il bottone dopo il click
@@ -248,11 +271,16 @@ function checkAndDisplayNextSceneButton() {
     // Accedi ai dati utente tramite window.App
     const user = window.App.getSimulatedUser(); 
     console.log(`Controllo progressione scena: XP Utente: ${user.experiencePoints}, Punteggio Minimo: ${minScoreToPass}`);
+
+    let finalModalMessage = "";
     if (user.experiencePoints >= minScoreToPass) {
-        console.log("Punteggio raggiunto! Mostro il bottone per la scena successiva.");
-        displayNextSceneButton();
+        finalModalMessage = `Complimenti! Hai superato la scena con ${user.experiencePoints} XP. Punteggio minimo richiesto: ${minScoreToPass} XP.`;
+        // Mostra il modal e, alla sua chiusura, il bottone per la scena successiva
+        window.App.showModal(finalModalMessage, displayNextSceneButton);
     } else {
-        window.App.showModal(`Non hai raggiunto il punteggio minimo (${minScoreToPass} XP) per passare alla prossima scena. Riprova!`);
+        finalModalMessage = `Peccato! Non hai raggiunto il punteggio minimo (${minScoreToPass} XP). Il tuo punteggio è ${user.experiencePoints} XP. Riprova!`;
+        // Mostra il modal, ma non il bottone di avanzamento
+        window.App.showModal(finalModalMessage);
     }
 }
 
